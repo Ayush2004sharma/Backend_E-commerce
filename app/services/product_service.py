@@ -3,23 +3,24 @@ from app.db import mongo
 from typing import Optional
 import uuid
 from app.schemas.product import ProductIn
-
-
-# ---------------------------
-# Get products with pagination
-async def get_products(page: int = 1, size: int = 20, category: Optional[str] = None, brand: Optional[str] = None):
+from typing import Optional
+from fastapi import APIRouter
+from bson import ObjectId
+async def get_all_products(category: Optional[str] = None, brand: Optional[str] = None):
     query = {}
     if category:
         query["category"] = category
     if brand:
         query["brand"] = brand
-    skip = (page - 1) * size
-    cursor = mongo.db["products"].find(query).skip(skip).limit(size)
+
+    cursor = mongo.db["products"].find(query)
     items = []
     async for doc in cursor:
+        # Convert _id to string
+        doc["id"] = str(doc["_id"])
         items.append(doc)
     total = await mongo.db["products"].count_documents(query)
-    return {"page": page, "size": size, "total": total, "items": items}
+    return {"total": total, "items": items}  # no pagination, just all items
 
 # ---------------------------
 # Get single product by ID

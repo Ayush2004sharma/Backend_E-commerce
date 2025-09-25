@@ -1,6 +1,6 @@
 # app/api/products.py
 from fastapi import APIRouter, Query, HTTPException
-from app.services.product_service import get_products, get_product_by_id, add_product, delete_product
+from app.services.product_service import get_all_products, get_product_by_id, add_product, delete_product
 from app.schemas.product import ProductList, ProductOut, ProductIn, ProductBulkIn
 from typing import List
 
@@ -9,14 +9,8 @@ router = APIRouter()
 # ---------------------------
 # Get products with pagination
 @router.get("/", response_model=ProductList)
-async def products(
-    page: int = Query(1, ge=1), 
-    size: int = Query(20, ge=1, le=100),
-    category: str | None = None, 
-    brand: str | None = None
-):
-    return await get_products(page=page, size=size, category=category, brand=brand)
-
+async def products(category: str | None = None, brand: str | None = None):
+    return await get_all_products(category=category, brand=brand)
 # ---------------------------
 # Get single product by ID
 @router.get("/{product_id}", response_model=ProductOut)
