@@ -5,7 +5,7 @@ from datetime import datetime
 
 # Output schemas (already present)
 class ProductOut(BaseModel):
-    _id: str
+    id: str
     name: str
     category: Optional[str] = None
     brand: Optional[str] = None

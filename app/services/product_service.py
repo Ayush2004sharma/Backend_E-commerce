@@ -35,9 +35,12 @@ async def get_all_products(
 
 
 # ---------------------------
-# Get single product by ID
 async def get_product_by_id(product_id: str):
-    return await mongo.db["products"].find_one({"_id": product_id})
+    doc = await mongo.db["products"].find_one({"_id": product_id})
+    if doc:
+        doc["id"] = str(doc["_id"])
+        del doc["_id"]   # ✅ remove MongoDB internal ID
+    return doc
 
 # ---------------------------
 # Add single product (used for bulk insert)
