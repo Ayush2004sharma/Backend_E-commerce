@@ -7,15 +7,18 @@ from datetime import datetime, timezone
 
 router = APIRouter()
 
-@router.get("/{user_id}", response_model=RecommendationResponse)
-async def recommend(user_id: str, user=Depends(get_current_user)):
-    # only allow personalized recs for authenticated users (JWT required)
-    if user is None or user.get("_id") != user_id:
-        # if you want admin to get others' recs, add role checks; for now keep strict
+@router.get("/", response_model=RecommendationResponse)
+async def recommend(user=Depends(get_current_user)):
+    if user is None:
         raise HTTPException(status_code=401, detail="unauthorized")
+    
+    user_id = str(user["_id"])  # get the user ID from the token
     recs = await recommend_for_user(user_id, n=10)
     generated_at = datetime.utcnow().replace(tzinfo=timezone.utc)
-    items = [RecommendationItem(productId=r["productId"], score=r["score"], why=r["why"]) for r in recs]
+    items = [
+        RecommendationItem(productId=r["productId"], score=r["score"], why=r["why"])
+        for r in recs
+    ]
     return RecommendationResponse(userId=user_id, recommendations=items, generatedAt=generated_at)
 
 @router.get("/similar/{product_id}", response_model=SimilarResponse)
