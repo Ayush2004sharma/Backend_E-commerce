@@ -6,21 +6,33 @@ from app.schemas.product import ProductIn
 from typing import Optional
 from fastapi import APIRouter
 from bson import ObjectId
-async def get_all_products(category: Optional[str] = None, brand: Optional[str] = None):
+async def get_all_products(
+    category: Optional[str] = None,
+    brand: Optional[str] = None,
+    page: int = 1,
+    size: int = 10   # default page size
+):
     query = {}
     if category:
         query["category"] = category
     if brand:
         query["brand"] = brand
 
-    cursor = mongo.db["products"].find(query)
+    skip = (page - 1) * size
+    cursor = mongo.db["products"].find(query).skip(skip).limit(size)
     items = []
     async for doc in cursor:
-        # Convert _id to string
         doc["id"] = str(doc["_id"])
         items.append(doc)
+
     total = await mongo.db["products"].count_documents(query)
-    return {"total": total, "items": items}  # no pagination, just all items
+    return {
+        "page": page,
+        "size": size,
+        "total": total,
+        "items": items
+    }
+
 
 # ---------------------------
 # Get single product by ID

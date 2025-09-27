@@ -8,9 +8,17 @@ router = APIRouter()
 
 # ---------------------------
 # Get products with pagination
+# products.py
 @router.get("/", response_model=ProductList)
-async def products(category: str | None = None, brand: str | None = None):
-    return await get_all_products(category=category, brand=brand)
+async def products(
+    category: str | None = None,
+    brand: str | None = None,
+    page: int = 1,
+    size: int = 12
+):
+    return await get_all_products(category=category, brand=brand, page=page, size=size)
+
+
 # ---------------------------
 # Get single product by ID
 @router.get("/{product_id}", response_model=ProductOut)
